@@ -1,14 +1,20 @@
+#include "SDL3/SDL_render.h"
 #include "fmt/base.h"
 #include "imgui.h"
 #include "imgui_impl_sdl3.h"
 #include "imgui_impl_sdlrenderer3.h"
+#include "swr/color.hpp"
+#include "swr/framebuffer.hpp"
+#include "swr/math/vec2.hpp"
 #include "swr/rasterizer.hpp"
 #include "swr/window.hpp"
 
 #include <SDL3/SDL.h>
+#include <cmath>
 #include <fmt/format.h>
 
 #include <chrono>
+#include <memory>
 #include <thread>
 
 int main() {
@@ -38,7 +44,7 @@ int main() {
 
     constexpr int texture_width = 640;
     constexpr int texture_height = 360;
-    auto* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,
+    auto* texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING,
                                       texture_width, texture_height);
     if (texture == nullptr) {
         fmt::println(stderr, "Texture creation failed: {}", SDL_GetError());
@@ -48,8 +54,16 @@ int main() {
         return 1;
     }
 
+    std::unique_ptr<swr::Framebuffer> colorBuffer =
+        std::make_unique<swr::Framebuffer>(texture_width, texture_height);
+    auto* framebuffer = colorBuffer.get();
+    swr::Rasterizer rasterizer{};
+    rasterizer.SetColorBuffer(std::move(colorBuffer));
+
     SDL_Event event;
     bool running = true;
+
+    double frame = 0.0;
 
     while (running) {
         while (SDL_PollEvent(&event)) {
@@ -59,6 +73,20 @@ int main() {
                 running = false;
             }
         }
+
+        float x = static_cast<float>(50.0f * sin(frame)) + 100.0f;
+        float y = static_cast<float>(50.0f * cos(frame)) + 100.0f;
+
+        rasterizer.Clear();
+        rasterizer.DrawCircle(swr::math::Vec2{x, y}, 30.0f,
+                              swr::Color{
+                                  .red = 255,
+                                  .green = 255,
+                                  .blue = 255,
+                                  .alpha = 255,
+                              });
+        SDL_UpdateTexture(texture, nullptr, framebuffer->Data(), framebuffer->Pitch());
+        frame += 0.01;
 
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
@@ -73,16 +101,6 @@ int main() {
         ImGui::Render();
         SDL_SetRenderDrawColor(renderer, 20, 20, 20, 255);
         SDL_RenderClear(renderer);
-
-        SDL_SetRenderTarget(renderer, texture);
-        SDL_SetRenderDrawColor(renderer, 20, 20, 20, 255);
-        SDL_RenderClear(renderer);
-
-        SDL_SetRenderDrawColor(renderer, 255, 0, 0, 255);
-        const SDL_FRect rectangle{100.0F, 100.0F, 300.0F, 200.0F};
-        SDL_RenderFillRect(renderer, &rectangle);
-
-        SDL_SetRenderTarget(renderer, nullptr);
 
         ImGui_ImplSDLRenderer3_RenderDrawData(ImGui::GetDrawData(), renderer);
         SDL_RenderPresent(renderer);

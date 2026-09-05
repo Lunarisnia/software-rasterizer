@@ -17,6 +17,20 @@ target_include_directories(swr_rasterizer
 
 swr_enable_warnings(swr_rasterizer)
 
+add_library(swr_math INTERFACE)
+
+add_library(swr::math ALIAS swr_math)
+
+target_compile_features(swr_math INTERFACE cxx_std_23)
+
+target_include_directories(swr_math
+    INTERFACE
+        $<BUILD_INTERFACE:${PROJECT_SOURCE_DIR}/include>
+        $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+)
+
+target_link_libraries(swr_rasterizer PUBLIC swr::math)
+
 add_library(swr_window
     window.cpp
 )

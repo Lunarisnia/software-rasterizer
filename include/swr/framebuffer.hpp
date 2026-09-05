@@ -11,6 +11,10 @@ class Framebuffer {
     int Width() const;
     int Height() const;
 
+    const Color* Data() const;
+    int Pitch() const;
+
+    void Clear();
     void SetPixel(int x, int y, Color color);
 
   private:
