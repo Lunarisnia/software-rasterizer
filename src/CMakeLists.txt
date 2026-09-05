@@ -1,5 +1,6 @@
 add_library(swr_rasterizer
     rasterizer.cpp
+    framebuffer.cpp
 )
 
 add_library(swr::rasterizer ALIAS swr_rasterizer)

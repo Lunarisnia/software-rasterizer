@@ -10,6 +10,7 @@ FetchContent_MakeAvailable(doctest)
 
 add_executable(swr_tests
     rasterizer_test.cpp
+    framebuffer_test.cpp
 )
 
 target_link_libraries(swr_tests PRIVATE swr::rasterizer doctest::doctest)
