@@ -11,4 +11,4 @@ struct Color {
     std::uint8_t alpha;
 };
 
-}
+} // namespace swr

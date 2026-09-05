@@ -8,7 +8,7 @@
 namespace swr {
 
 class SdlContext {
-public:
+  public:
     static std::expected<SdlContext, std::string> create();
     ~SdlContext();
 
@@ -17,14 +17,13 @@ public:
     SdlContext(SdlContext&&) = default;
     SdlContext& operator=(SdlContext&&) = delete;
 
-private:
+  private:
     SdlContext() = default;
 };
 
 class Window {
-public:
-    static std::expected<Window, std::string>
-    create(int width, int height, std::string_view title);
+  public:
+    static std::expected<Window, std::string> create(int width, int height, std::string_view title);
     ~Window();
 
     Window(const Window&) = delete;
@@ -37,7 +36,7 @@ public:
     void* native_handle() const;
     void* renderer_handle() const;
 
-private:
+  private:
     struct Impl;
     std::unique_ptr<Impl> impl_;
 
