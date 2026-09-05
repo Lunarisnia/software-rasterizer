@@ -21,3 +21,11 @@ FetchContent_Declare(
     EXCLUDE_FROM_ALL
 )
 FetchContent_MakeAvailable(SDL3)
+
+FetchContent_Declare(
+    imgui
+    GIT_REPOSITORY https://github.com/ocornut/imgui.git
+    GIT_TAG v1.92.9b-docking
+    EXCLUDE_FROM_ALL
+)
+FetchContent_MakeAvailable(imgui)

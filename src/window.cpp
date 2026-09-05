@@ -22,6 +22,7 @@ SdlContext::~SdlContext() {
 
 struct Window::Impl {
     SDL_Window* handle{};
+    SDL_Renderer* renderer{};
 };
 
 Window::Window(std::unique_ptr<Impl> impl)
@@ -41,12 +42,21 @@ Window::create(int width, int height, std::string_view title) {
         return std::unexpected(error);
     }
 
+    impl->renderer = SDL_CreateRenderer(impl->handle, nullptr);
+    if (impl->renderer == nullptr) {
+        const std::string error =
+            std::string("SDL renderer creation failed: ") + SDL_GetError();
+        SDL_DestroyWindow(impl->handle);
+        return std::unexpected(error);
+    }
+
     return Window(std::move(impl));
 }
 
 Window::~Window() {
     if (impl_ != nullptr && impl_->handle != nullptr) {
         SDL_DestroyWindow(impl_->handle);
+        SDL_DestroyRenderer(impl_->renderer);
     }
 }
 
@@ -56,8 +66,17 @@ bool Window::process_events() {
         if (event.type == SDL_EVENT_QUIT) {
             return false;
         }
+
     }
     return true;
+}
+
+void* Window::native_handle() const {
+    return impl_->handle;
+}
+
+void* Window::renderer_handle() const {
+    return impl_->renderer;
 }
 
 } // namespace swr

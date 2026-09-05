@@ -11,3 +11,4 @@ compile_commands.json
 
 # Platform files
 .DS_Store
+imgui.ini

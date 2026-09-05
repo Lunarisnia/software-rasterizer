@@ -34,6 +34,9 @@ public:
 
     bool process_events();
 
+    void* native_handle() const;
+    void* renderer_handle() const;
+
 private:
     struct Impl;
     std::unique_ptr<Impl> impl_;
