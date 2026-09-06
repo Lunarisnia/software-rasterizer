@@ -6,11 +6,11 @@
 #include "swr/color.hpp"
 #include "swr/framebuffer.hpp"
 #include "swr/math/vec2.hpp"
+#include "swr/math/vec3.hpp"
 #include "swr/rasterizer.hpp"
 #include "swr/window.hpp"
 
 #include <SDL3/SDL.h>
-#include <cmath>
 #include <fmt/format.h>
 
 #include <chrono>
@@ -57,13 +57,14 @@ int main() {
     std::unique_ptr<swr::Framebuffer> colorBuffer =
         std::make_unique<swr::Framebuffer>(texture_width, texture_height);
     auto* framebuffer = colorBuffer.get();
-    swr::Rasterizer rasterizer{};
-    rasterizer.SetColorBuffer(std::move(colorBuffer));
+    swr::Rasterizer rasterizer(std::move(colorBuffer));
 
     SDL_Event event;
     bool running = true;
 
-    double frame = 0.0;
+    float point_a[3]{100.0F, 100.0F, 0.0F};
+    float point_b[3]{300.0F, 200.0F, 0.0F};
+    float point_c[3]{200.0F, 300.0F, 0.0F};
 
     while (running) {
         while (SDL_PollEvent(&event)) {
@@ -74,24 +75,28 @@ int main() {
             }
         }
 
-        float x = static_cast<float>(50.0f * sin(frame)) + 100.0f;
-        float y = static_cast<float>(50.0f * cos(frame)) + 100.0f;
-
         rasterizer.Clear();
-        rasterizer.DrawCircle(swr::math::Vec2{x, y}, 30.0f,
-                              swr::Color{
-                                  .red = 255,
-                                  .green = 255,
-                                  .blue = 255,
-                                  .alpha = 255,
-                              });
+        rasterizer.DrawTriangle(swr::math::Vec3{point_a[0], point_a[1], point_a[2]},
+                                swr::math::Vec3{point_b[0], point_b[1], point_b[2]},
+                                swr::math::Vec3{point_c[0], point_c[1], point_c[2]},
+                                swr::Color{
+                                    .red = 255,
+                                    .green = 255,
+                                    .blue = 255,
+                                    .alpha = 255,
+                                });
         SDL_UpdateTexture(texture, nullptr, framebuffer->Data(), framebuffer->Pitch());
-        frame += 0.01;
 
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
 
         ImGui::ShowDemoWindow();
+
+        ImGui::Begin("Triangle Inspector");
+        ImGui::DragFloat3("Point A", point_a, 1.0F, 0.0F, static_cast<float>(texture_width));
+        ImGui::DragFloat3("Point B", point_b, 1.0F, 0.0F, static_cast<float>(texture_width));
+        ImGui::DragFloat3("Point C", point_c, 1.0F, 0.0F, static_cast<float>(texture_width));
+        ImGui::End();
 
         ImGui::Begin("Raster Output");
         ImGui::Image(reinterpret_cast<ImTextureID>(texture),
