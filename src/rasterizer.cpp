@@ -64,6 +64,9 @@ void Rasterizer::DrawTriangle(Vec3 a, Vec3 b, Vec3 c, Color color) {
             const double gamma = math::SignedTriangleArea(x, y, ax, ay, bx, by) / totalArea;
 
             // So the farther inside the bigger the numbers?
+            if (alpha < 0.0 || beta < 0.0 || gamma < 0.0) {
+                continue;
+            }
             if (alpha <= 0.2f || beta <= 0.2f || gamma <= 0.2f) {
                 colorBuffer_->SetPixel(x, y, color);
             }

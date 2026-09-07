@@ -5,6 +5,7 @@
 #include "imgui_impl_sdlrenderer3.h"
 #include "swr/color.hpp"
 #include "swr/framebuffer.hpp"
+#include "swr/math/triangle.hpp"
 #include "swr/math/vec2.hpp"
 #include "swr/math/vec3.hpp"
 #include "swr/rasterizer.hpp"
@@ -66,6 +67,8 @@ int main() {
     float point_b[3]{300.0F, 200.0F, 0.0F};
     float point_c[3]{200.0F, 300.0F, 0.0F};
 
+    float point_d[3]{100.0F, 100.0F, 0.0F};
+
     while (running) {
         while (SDL_PollEvent(&event)) {
             ImGui_ImplSDL3_ProcessEvent(&event);
@@ -73,6 +76,25 @@ int main() {
             if (event.type == SDL_EVENT_QUIT) {
                 running = false;
             }
+        }
+
+        const int ax = static_cast<int>(point_a[0]);
+        const int ay = static_cast<int>(point_a[1]);
+        const int bx = static_cast<int>(point_b[0]);
+        const int by = static_cast<int>(point_b[1]);
+        const int cx = static_cast<int>(point_c[0]);
+        const int cy = static_cast<int>(point_c[1]);
+        const int x = static_cast<int>(point_d[0]);
+        const int y = static_cast<int>(point_d[1]);
+
+        const double total_area = swr::math::SignedTriangleArea(ax, ay, bx, by, cx, cy);
+        double alpha = 0.0;
+        double beta = 0.0;
+        double gamma = 0.0;
+        if (total_area != 0.0) {
+            alpha = swr::math::SignedTriangleArea(x, y, bx, by, cx, cy) / total_area;
+            beta = swr::math::SignedTriangleArea(x, y, cx, cy, ax, ay) / total_area;
+            gamma = swr::math::SignedTriangleArea(x, y, ax, ay, bx, by) / total_area;
         }
 
         rasterizer.Clear();
@@ -85,6 +107,7 @@ int main() {
                                     .blue = 255,
                                     .alpha = 255,
                                 });
+        rasterizer.DrawCircle(swr::math::Vec2{point_d[0], point_d[1]}, 4.0f, swr::colors::Red);
         SDL_UpdateTexture(texture, nullptr, framebuffer->Data(), framebuffer->Pitch());
 
         ImGui_ImplSDL3_NewFrame();
@@ -96,6 +119,10 @@ int main() {
         ImGui::DragFloat3("Point A", point_a, 1.0F, 0.0F, static_cast<float>(texture_width));
         ImGui::DragFloat3("Point B", point_b, 1.0F, 0.0F, static_cast<float>(texture_width));
         ImGui::DragFloat3("Point C", point_c, 1.0F, 0.0F, static_cast<float>(texture_width));
+        ImGui::DragFloat3("Point D", point_d, 1.0F, 0.0F, static_cast<float>(texture_width));
+        ImGui::Text("Alpha: %.3f", alpha);
+        ImGui::Text("Beta: %.3f", beta);
+        ImGui::Text("Gamma: %.3f", gamma);
         ImGui::End();
 
         ImGui::Begin("Raster Output");
