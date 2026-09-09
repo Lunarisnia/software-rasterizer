@@ -15,7 +15,7 @@ test: build
 	ctest --test-dir $(BUILD_DIR) --output-on-failure
 
 run: build
-	./$(BUILD_DIR)/examples/window/swr_window_example
+	./$(BUILD_DIR)/examples/model_loading/swr_model_loading_example
 
 debug-configure:
 	cmake -S . -B build-asan \
