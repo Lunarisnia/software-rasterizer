@@ -16,6 +16,7 @@ class Framebuffer {
 
     void Clear();
     void SetPixel(int x, int y, Color color);
+    Color GetPixel(int x, int y);
 
   private:
     int width_;

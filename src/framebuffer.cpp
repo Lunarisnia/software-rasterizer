@@ -1,4 +1,5 @@
 #include "swr/framebuffer.hpp"
+#include "swr/color.hpp"
 #include <algorithm>
 #include <cstddef>
 
@@ -39,4 +40,10 @@ void Framebuffer::SetPixel(int x, int y, Color color) {
 
     pixels_[static_cast<std::size_t>(y) * width_ + x] = color;
 }
+
+// NOTE: might need to check its size first
+swr::Color Framebuffer::GetPixel(int x, int y) {
+    return pixels_[static_cast<std::size_t>(y) * width_ + x];
+}
+
 } // namespace swr
