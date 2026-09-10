@@ -16,6 +16,9 @@ class Rasterizer {
     void DrawCircle(math::Vec2 center, float radius, Color color);
     void DrawTriangle(math::Vec3 a, math::Vec3 b, math::Vec3 c, Color color);
 
+    int Width() const;
+    int Height() const;
+
     void Clear();
 
   private:

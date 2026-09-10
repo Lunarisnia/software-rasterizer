@@ -1,5 +1,7 @@
 #include "swr/obj_loader.hpp"
+#include "swr/color.hpp"
 
+#include <array>
 #include <expected>
 #include <filesystem>
 #include <fstream>
@@ -18,25 +20,27 @@ std::expected<std::string, std::string> readFile(const std::filesystem::path& pa
     return std::string(std::istreambuf_iterator<char>{file}, std::istreambuf_iterator<char>{});
 }
 
-void OBJLoader::Load(const std::filesystem::path& path) {
+std::expected<Mesh, std::string> OBJLoader::Load(const std::filesystem::path& path) {
     auto contents = readFile(path);
     if (!contents) {
-        return;
+        return std::unexpected("File not found: " + path.string());
     }
     std::ifstream file(path, std::ios::binary);
     if (!file) {
-        return;
-        // return std::unexpected("Could not open file: " + path.string());
+        return std::unexpected("Could not open file: " + path.string());
     }
 
-    Object loaded{};
+    Mesh loaded{};
     std::string line;
     while (std::getline(file, line)) {
         parseLine(loaded, line);
+        loaded.colors.emplace_back(colors::RandomColor());
     }
+
+    return loaded;
 }
 
-void OBJLoader::parseLine(Object& loaded, std::string& line) {
+void OBJLoader::parseLine(Mesh& loaded, std::string& line) {
     std::istringstream stream(line);
     std::string prefix;
     stream >> prefix;
@@ -49,8 +53,34 @@ void OBJLoader::parseLine(Object& loaded, std::string& line) {
             loaded.vertices.emplace_back(x, y, z);
         }
     } else if (prefix == "f") {
-        // TODO: face parser
+        std::string firstSection;
+        std::string secondSection;
+        std::string thirdSection;
+        stream >> firstSection;
+        stream >> secondSection;
+        stream >> thirdSection;
+        loaded.vertexIndice.emplace_back(std::array<int, 3>{
+            parseVertexNormalIndice(firstSection),
+            parseVertexNormalIndice(secondSection),
+            parseVertexNormalIndice(thirdSection),
+        });
     }
+}
+
+// TODO: parse texture coord (also handle optionality)
+// TODO: parse vertex normal
+int OBJLoader::parseVertexNormalIndice(const std::string& section) {
+    std::istringstream stream(section);
+
+    std::string vertexStr;
+    // uint textureCoord;
+    // uint vertexNormal;
+
+    std::getline(stream, vertexStr, '/');
+
+    int vertex = std::stoi(vertexStr) - 1;
+
+    return vertex;
 }
 
 } // namespace swr

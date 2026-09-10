@@ -67,15 +67,21 @@ void Rasterizer::DrawTriangle(Vec3 a, Vec3 b, Vec3 c, Color color) {
             if (alpha < 0.0 || beta < 0.0 || gamma < 0.0) {
                 continue;
             }
-            if (alpha <= 0.2f || beta <= 0.2f || gamma <= 0.2f) {
-                colorBuffer_->SetPixel(x, y, color);
-            }
+            colorBuffer_->SetPixel(x, y, color);
         }
     }
 }
 
 void Rasterizer::Clear() {
     colorBuffer_->Clear();
+}
+
+int Rasterizer::Width() const {
+    return colorBuffer_->Width();
+}
+
+int Rasterizer::Height() const {
+    return colorBuffer_->Height();
 }
 
 } // namespace swr
