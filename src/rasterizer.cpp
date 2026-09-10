@@ -53,7 +53,7 @@ void Rasterizer::DrawTriangle(Vec3 a, Vec3 b, Vec3 c, Color color) {
     const int bbmaxy = std::max({ay, by, cy});
 
     const double totalArea = math::SignedTriangleArea(ax, ay, bx, by, cx, cy);
-    if (totalArea == 0.0) {
+    if (totalArea < 1.0) {
         return;
     }
 
