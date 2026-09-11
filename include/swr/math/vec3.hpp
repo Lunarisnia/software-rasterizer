@@ -1,5 +1,6 @@
 #pragma once
 
+#include <cassert>
 #include <cmath>
 
 namespace swr::math {
@@ -21,8 +22,53 @@ class Vec3 {
         return z_;
     }
 
+    constexpr Vec3 operator+(const Vec3& other) const {
+        return Vec3{
+            x_ + other.x_,
+            y_ + other.y_,
+            z_ + other.z_,
+        };
+    }
+
+    constexpr Vec3 operator+(float scalar) const {
+        return Vec3{
+            x_ + scalar,
+            y_ + scalar,
+            z_ + scalar,
+        };
+    }
+
+    constexpr Vec3 operator-(const Vec3& other) const {
+        return Vec3{
+            x_ - other.x_,
+            y_ - other.y_,
+            z_ - other.z_,
+        };
+    }
+
+    constexpr Vec3 operator-() const {
+        return Vec3{-x_, -y_, -z_};
+    }
+
+    constexpr Vec3 operator/(float scalar) const {
+        assert(scalar != 0.0F);
+        return Vec3{
+            x_ / scalar,
+            y_ / scalar,
+            z_ / scalar,
+        };
+    }
+
+    constexpr float dot(const Vec3& other) const {
+        return x_ * other.x_ + y_ * other.y_ + z_ * other.z_;
+    }
+
+    constexpr float lengthSquared() const {
+        return dot(*this);
+    }
+
     float length() const {
-        return std::sqrt(x_ * x_ + y_ * y_ + z_ * z_);
+        return std::sqrt(lengthSquared());
     }
 
   private:
