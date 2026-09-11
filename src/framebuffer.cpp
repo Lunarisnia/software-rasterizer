@@ -43,6 +43,10 @@ void Framebuffer::SetPixel(int x, int y, Color color) {
 
 // NOTE: might need to check its size first
 swr::Color Framebuffer::GetPixel(int x, int y) {
+    if (x < 0 || x >= width_ || y < 0 || y >= height_) {
+        return {};
+    }
+
     return pixels_[static_cast<std::size_t>(y) * width_ + x];
 }
 

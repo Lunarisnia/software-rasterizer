@@ -4,6 +4,7 @@
 #include "swr/mesh.hpp"
 #include "swr/rasterizer.hpp"
 
+#include <algorithm>
 #include <cmath>
 #include <utility>
 
@@ -31,10 +32,17 @@ math::Vec3 TransformVertex(math::Vec3 vertex, math::Vec3 position, math::Vec3 ro
     const float rotated_x = vertex.x() * cos_z - vertex.y() * sin_z;
     const float rotated_y = vertex.x() * sin_z + vertex.y() * cos_z;
 
+    const float transformed_z = rotated_z + position.z();
+    const float projected_z = std::clamp((transformed_z + 1.0F) * 255.0F / 2.0F, 0.0F, 255.0F);
+    const float projected_x = rotated_x * 300.0F +
+                              static_cast<float>(viewport_width) / 2.0F + position.x();
+    const float projected_y = rotated_y * 300.0F +
+                              static_cast<float>(viewport_height) / 2.0F + position.y();
+
     return math::Vec3{
-        rotated_x * 300.0F + static_cast<float>(viewport_width) / 2.0F + position.x(),
-        -rotated_y * 300.0F + static_cast<float>(viewport_height) / 2.0F + position.y(),
-        rotated_z + position.z(),
+        projected_x,
+        projected_y,
+        projected_z,
     };
 }
 

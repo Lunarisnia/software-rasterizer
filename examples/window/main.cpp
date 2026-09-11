@@ -57,8 +57,10 @@ int main() {
 
     std::unique_ptr<swr::Framebuffer> colorBuffer =
         std::make_unique<swr::Framebuffer>(texture_width, texture_height);
+    std::unique_ptr<swr::Framebuffer> depthBuffer =
+        std::make_unique<swr::Framebuffer>(texture_width, texture_height);
     auto* framebuffer = colorBuffer.get();
-    swr::Rasterizer rasterizer(std::move(colorBuffer));
+    swr::Rasterizer rasterizer(std::move(colorBuffer), std::move(depthBuffer));
 
     SDL_Event event;
     bool running = true;

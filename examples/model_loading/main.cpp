@@ -48,10 +48,19 @@ int main() {
         fmt::println(stderr, "Texture creation failed: {}", SDL_GetError());
         return 1;
     }
+    auto* depth_texture =
+        SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32, SDL_TEXTUREACCESS_STREAMING,
+                          texture_width, texture_height);
+    if (depth_texture == nullptr) {
+        fmt::println(stderr, "Texture creation failed: {}", SDL_GetError());
+        return 1;
+    }
 
     auto color_buffer = std::make_unique<swr::Framebuffer>(texture_width, texture_height);
+    auto depth_buffer = std::make_unique<swr::Framebuffer>(texture_width, texture_height);
     auto* framebuffer = color_buffer.get();
-    swr::Rasterizer rasterizer(std::move(color_buffer));
+    auto* depthbuffer = depth_buffer.get();
+    swr::Rasterizer rasterizer(std::move(color_buffer), std::move(depth_buffer));
 
     auto head_renderer = std::make_unique<swr::MeshRenderer>(rasterizer, std::move(*head));
     float position[3]{};
@@ -79,8 +88,7 @@ int main() {
         }
 
         constexpr float radians_per_degree = 0.0174532925F;
-        head_renderer->SetPosition(
-            swr::math::Vec3{position[0], position[1], position[2]});
+        head_renderer->SetPosition(swr::math::Vec3{position[0], position[1], position[2]});
         head_renderer->SetRotation(swr::math::Vec3{
             rotation[0] * radians_per_degree,
             rotation[1] * radians_per_degree,
@@ -90,6 +98,7 @@ int main() {
         rasterizer.Clear();
         head_renderer->Render();
         SDL_UpdateTexture(texture, nullptr, framebuffer->Data(), framebuffer->Pitch());
+        SDL_UpdateTexture(depth_texture, nullptr, depthbuffer->Data(), depthbuffer->Pitch());
 
         ImGui_ImplSDL3_NewFrame();
         ImGui::NewFrame();
@@ -111,9 +120,11 @@ int main() {
         ImGui::End();
 
         ImGui::Begin("Model Inspector");
-        if (ImGui::DragFloat3("Position", position, 0.25F, -300.0F, 300.0F)) {
-            head_renderer->SetPosition(
-                swr::math::Vec3{position[0], position[1], position[2]});
+        if (ImGui::DragFloat2("Position XY", position, 0.25F, -300.0F, 300.0F)) {
+            head_renderer->SetPosition(swr::math::Vec3{position[0], position[1], position[2]});
+        }
+        if (ImGui::DragFloat("Position Z", &position[2], 0.01F, -2.0F, 2.0F)) {
+            head_renderer->SetPosition(swr::math::Vec3{position[0], position[1], position[2]});
         }
         if (ImGui::DragFloat3("Rotation", rotation, 0.1F, -180.0F, 180.0F)) {
             head_renderer->SetRotation(swr::math::Vec3{
@@ -126,6 +137,11 @@ int main() {
 
         ImGui::Begin("Loaded Model");
         ImGui::Image(reinterpret_cast<ImTextureID>(texture),
+                     ImVec2(static_cast<float>(texture_width), static_cast<float>(texture_height)));
+        ImGui::End();
+
+        ImGui::Begin("Depth Buffer");
+        ImGui::Image(reinterpret_cast<ImTextureID>(depth_texture),
                      ImVec2(static_cast<float>(texture_width), static_cast<float>(texture_height)));
         ImGui::End();
 

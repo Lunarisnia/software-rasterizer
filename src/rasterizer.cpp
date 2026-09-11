@@ -1,4 +1,5 @@
 #include "swr/rasterizer.hpp"
+#include "swr/color.hpp"
 #include "swr/framebuffer.hpp"
 #include "swr/math/triangle.hpp"
 #include "swr/math/vec2.hpp"
@@ -16,8 +17,9 @@ int version() {
     return 1;
 }
 
-Rasterizer::Rasterizer(std::unique_ptr<Framebuffer> colorBuffer)
-    : colorBuffer_(std::move(colorBuffer)) {}
+Rasterizer::Rasterizer(std::unique_ptr<Framebuffer> colorBuffer,
+                       std::unique_ptr<Framebuffer> depthBuffer)
+    : colorBuffer_(std::move(colorBuffer)), depthBuffer_(std::move(depthBuffer)) {}
 
 void Rasterizer::DrawCircle(Vec2 center, float radius, Color color) {
     for (float y = center.y() - radius; y <= center.y() + radius; y++) {
@@ -42,15 +44,14 @@ void Rasterizer::DrawTriangle(Vec3 a, Vec3 b, Vec3 c, Color color) {
     const int cx = static_cast<int>(c.x());
     const int cy = static_cast<int>(c.y());
 
-    // Unused
-    // const int az = static_cast<int>(a.z());
-    // const int bz = static_cast<int>(b.z());
-    // const int cz = static_cast<int>(c.z());
+    const float az = a.z();
+    const float bz = b.z();
+    const float cz = c.z();
 
-    const int bbminx = std::min({ax, bx, cx});
-    const int bbminy = std::min({ay, by, cy});
-    const int bbmaxx = std::max({ax, bx, cx});
-    const int bbmaxy = std::max({ay, by, cy});
+    const int bbminx = std::clamp(std::min({ax, bx, cx}), 0, Width() - 1);
+    const int bbminy = std::clamp(std::min({ay, by, cy}), 0, Height() - 1);
+    const int bbmaxx = std::clamp(std::max({ax, bx, cx}), 0, Width() - 1);
+    const int bbmaxy = std::clamp(std::max({ay, by, cy}), 0, Height() - 1);
 
     const double totalArea = math::SignedTriangleArea(ax, ay, bx, by, cx, cy);
     if (totalArea < 1.0) {
@@ -67,6 +68,16 @@ void Rasterizer::DrawTriangle(Vec3 a, Vec3 b, Vec3 c, Color color) {
             if (alpha < 0.0 || beta < 0.0 || gamma < 0.0) {
                 continue;
             }
+
+            const float interpolated_z = az * static_cast<float>(alpha) +
+                                         bz * static_cast<float>(beta) +
+                                         cz * static_cast<float>(gamma);
+            if (interpolated_z <= depthBuffer_->GetPixel(x, y).red) {
+                continue;
+            }
+
+            const auto z = static_cast<std::uint8_t>(std::clamp(interpolated_z, 0.0F, 255.0F));
+            depthBuffer_->SetPixel(x, y, Color{z, z, z, 255});
             colorBuffer_->SetPixel(x, y, color);
         }
     }
@@ -74,6 +85,7 @@ void Rasterizer::DrawTriangle(Vec3 a, Vec3 b, Vec3 c, Color color) {
 
 void Rasterizer::Clear() {
     colorBuffer_->Clear();
+    depthBuffer_->Clear();
 }
 
 int Rasterizer::Width() const {
