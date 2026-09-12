@@ -12,6 +12,7 @@ add_executable(swr_tests
     rasterizer_test.cpp
     framebuffer_test.cpp
     vector_test.cpp
+    matrix_test.cpp
 )
 
 target_link_libraries(swr_tests PRIVATE swr::rasterizer doctest::doctest)
