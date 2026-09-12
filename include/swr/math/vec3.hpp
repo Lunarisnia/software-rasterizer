@@ -63,12 +63,28 @@ class Vec3 {
         return x_ * other.x_ + y_ * other.y_ + z_ * other.z_;
     }
 
+    constexpr Vec3 cross(const Vec3& other) const {
+        return Vec3{
+            y_ * other.z_ - z_ * other.y_,
+            z_ * other.x_ - x_ * other.z_,
+            x_ * other.y_ - y_ * other.x_,
+        };
+    }
+
     constexpr float lengthSquared() const {
         return dot(*this);
     }
 
     float length() const {
         return std::sqrt(lengthSquared());
+    }
+
+    Vec3 normalized() const {
+        const float magnitude = length();
+        if (magnitude == 0.0F) {
+            return *this;
+        }
+        return *this / magnitude;
     }
 
   private:

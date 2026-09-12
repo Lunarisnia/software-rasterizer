@@ -63,6 +63,14 @@ class Vec2 {
         return std::sqrt(lengthSquared());
     }
 
+    Vec2 normalized() const {
+        const float magnitude = length();
+        if (magnitude == 0.0F) {
+            return *this;
+        }
+        return *this / magnitude;
+    }
+
   private:
     float x_{};
     float y_{};
