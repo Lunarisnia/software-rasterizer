@@ -1,5 +1,6 @@
 #pragma once
 
+#include "swr/math/vec3.hpp"
 #include <array>
 #include <cassert>
 #include <cstddef>
@@ -68,6 +69,25 @@ class Mat3x3 {
             }
         }
         return result;
+    }
+
+    constexpr Vec3 operator*(const Vec3& other) const {
+        return Vec3{
+            (*this)(0, 0) * other.x() + (*this)(0, 1) * other.y() + (*this)(0, 2) * other.z(),
+            (*this)(1, 0) * other.x() + (*this)(1, 1) * other.y() + (*this)(1, 2) * other.z(),
+            (*this)(2, 0) * other.x() + (*this)(2, 1) * other.y() + (*this)(2, 2) * other.z(),
+        };
+    }
+
+    constexpr void T() {
+        Mat3x3 result = Mat3x3::Zero();
+        for (std::size_t row = 0; row < 3; row++) {
+            for (std::size_t col = 0; col < 3; col++) {
+                result(col, row) = (*this)(row, col);
+            }
+        }
+
+        m_ = result.m_;
     }
 
   private:

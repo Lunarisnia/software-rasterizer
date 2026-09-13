@@ -113,3 +113,55 @@ TEST_CASE("Mat3x3 identity preserves matrix multiplication") {
         }
     }
 }
+
+TEST_CASE("Mat3x3 vector multiplication computes row dot products") {
+    // clang-format off
+    constexpr swr::math::Mat3x3 matrix{{
+        1.0F, 2.0F, 3.0F,
+        4.0F, 5.0F, 6.0F,
+        7.0F, 8.0F, 9.0F,
+    }};
+    // clang-format on
+    constexpr swr::math::Vec3 vector{1.0F, 2.0F, 3.0F};
+
+    constexpr auto result = matrix * vector;
+
+    static_assert(result.x() == 14.0F);
+    static_assert(result.y() == 32.0F);
+    static_assert(result.z() == 50.0F);
+}
+
+TEST_CASE("Mat3x3 identity preserves vector multiplication") {
+    constexpr swr::math::Vec3 vector{1.0F, -2.0F, 3.0F};
+
+    constexpr auto result = swr::math::Mat3x3::Identity() * vector;
+
+    static_assert(result.x() == vector.x());
+    static_assert(result.y() == vector.y());
+    static_assert(result.z() == vector.z());
+}
+
+TEST_CASE("Mat3x3 transpose swaps rows and columns") {
+    // clang-format off
+    constexpr auto result = [] {
+        swr::math::Mat3x3 matrix{{
+            1.0F, 2.0F, 3.0F,
+            4.0F, 5.0F, 6.0F,
+            7.0F, 8.0F, 9.0F,
+        }};
+        matrix.T();
+        return matrix;
+    }();
+    constexpr swr::math::Mat3x3 expected{{
+        1.0F, 4.0F, 7.0F,
+        2.0F, 5.0F, 8.0F,
+        3.0F, 6.0F, 9.0F,
+    }};
+    // clang-format on
+
+    for (std::size_t row = 0; row < 3; ++row) {
+        for (std::size_t column = 0; column < 3; ++column) {
+            CHECK(result(row, column) == expected(row, column));
+        }
+    }
+}
