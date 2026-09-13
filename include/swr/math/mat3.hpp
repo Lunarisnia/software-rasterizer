@@ -90,6 +90,24 @@ class Mat3x3 {
         m_ = result.m_;
     }
 
+    constexpr float determinant() const {
+        const float m00 = (*this)(0, 0);
+        const float m01 = (*this)(0, 1);
+        const float m02 = (*this)(0, 2);
+        const float m10 = (*this)(1, 0);
+        const float m11 = (*this)(1, 1);
+        const float m12 = (*this)(1, 2);
+        const float m20 = (*this)(2, 0);
+        const float m21 = (*this)(2, 1);
+        const float m22 = (*this)(2, 2);
+
+        const float minor00 = m11 * m22 - m12 * m21;
+        const float minor01 = m10 * m22 - m12 * m20;
+        const float minor02 = m10 * m21 - m11 * m20;
+
+        return m00 * minor00 - m01 * minor01 + m02 * minor02;
+    }
+
   private:
     std::array<float, 9> m_{};
 };

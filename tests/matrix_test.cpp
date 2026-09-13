@@ -165,3 +165,31 @@ TEST_CASE("Mat3x3 transpose swaps rows and columns") {
         }
     }
 }
+
+TEST_CASE("Mat3x3 determinant computes signed volume scale") {
+    // clang-format off
+    constexpr swr::math::Mat3x3 matrix{{
+         2.0F, -3.0F,  1.0F,
+         2.0F,  0.0F, -1.0F,
+         1.0F,  4.0F,  5.0F,
+    }};
+    // clang-format on
+
+    static_assert(matrix.determinant() == 49.0F);
+}
+
+TEST_CASE("Mat3x3 identity determinant is one") {
+    static_assert(swr::math::Mat3x3::Identity().determinant() == 1.0F);
+}
+
+TEST_CASE("Mat3x3 singular matrix determinant is zero") {
+    // clang-format off
+    constexpr swr::math::Mat3x3 matrix{{
+        1.0F, 2.0F, 3.0F,
+        2.0F, 4.0F, 6.0F,
+        7.0F, 8.0F, 9.0F,
+    }};
+    // clang-format on
+
+    static_assert(matrix.determinant() == 0.0F);
+}
