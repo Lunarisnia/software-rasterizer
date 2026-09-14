@@ -1,7 +1,7 @@
 BUILD_DIR ?= build
 BUILD_TYPE ?= Debug
 
-.PHONY: all configure build test run debug-configure debug-build debug-run clean
+.PHONY: all configure build test run run-window run-math-lab debug-configure debug-build debug-run clean
 
 all: build
 
@@ -16,6 +16,12 @@ test: build
 
 run: build
 	./$(BUILD_DIR)/examples/model_loading/swr_model_loading_example
+
+run-window: build
+	./$(BUILD_DIR)/examples/window/swr_window_example
+
+run-math-lab: build
+	./$(BUILD_DIR)/examples/math_lab/swr_math_lab_example
 
 debug-configure:
 	cmake -S . -B build-asan \

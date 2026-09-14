@@ -64,7 +64,6 @@ int main() {
 
     auto head_renderer = std::make_unique<swr::MeshRenderer>(rasterizer, std::move(*head));
     float position[3]{};
-    float rotation[3]{};
 
     std::array<char, 512> model_path{};
     std::strncpy(model_path.data(), "obj/african_head/african_head.obj", model_path.size() - 1);
@@ -87,13 +86,7 @@ int main() {
             }
         }
 
-        constexpr float radians_per_degree = 0.0174532925F;
         head_renderer->SetPosition(swr::math::Vec3{position[0], position[1], position[2]});
-        head_renderer->SetRotation(swr::math::Vec3{
-            rotation[0] * radians_per_degree,
-            rotation[1] * radians_per_degree,
-            rotation[2] * radians_per_degree,
-        });
 
         rasterizer.Clear();
         head_renderer->Render();
@@ -125,13 +118,6 @@ int main() {
         }
         if (ImGui::DragFloat("Position Z", &position[2], 0.01F, -2.0F, 2.0F)) {
             head_renderer->SetPosition(swr::math::Vec3{position[0], position[1], position[2]});
-        }
-        if (ImGui::DragFloat3("Rotation", rotation, 0.1F, -180.0F, 180.0F)) {
-            head_renderer->SetRotation(swr::math::Vec3{
-                rotation[0] * radians_per_degree,
-                rotation[1] * radians_per_degree,
-                rotation[2] * radians_per_degree,
-            });
         }
         ImGui::End();
 
