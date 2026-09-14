@@ -5,15 +5,15 @@
 #include <cassert>
 #include <cstddef>
 namespace swr::math {
-class Mat3x3 {
+class Mat3 {
   public:
-    static constexpr Mat3x3 Zero() {
-        return Mat3x3{{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
+    static constexpr Mat3 Zero() {
+        return Mat3{{0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f, 0.0f}};
     }
 
-    static constexpr Mat3x3 Identity() {
+    static constexpr Mat3 Identity() {
         // clang-format off
-        return Mat3x3{{
+        return Mat3{{
             1.0f, 0.0f, 0.0f,
             0.0f, 1.0f, 0.0f,
             0.0f, 0.0f, 1.0f,
@@ -22,7 +22,7 @@ class Mat3x3 {
     }
 
   public:
-    constexpr explicit Mat3x3(std::array<float, 9> values) : m_(values) {}
+    constexpr explicit Mat3(std::array<float, 9> values) : m_(values) {}
 
     constexpr float& operator()(std::size_t row, std::size_t column) {
         assert(row < 3 && column < 3);
@@ -34,24 +34,24 @@ class Mat3x3 {
         return m_[row * 3 + column];
     }
 
-    constexpr Mat3x3 operator+(const Mat3x3& other) const {
-        Mat3x3 result = Zero();
+    constexpr Mat3 operator+(const Mat3& other) const {
+        Mat3 result = Zero();
         for (std::size_t index = 0; index < m_.size(); ++index) {
             result.m_[index] = m_[index] + other.m_[index];
         }
         return result;
     }
 
-    constexpr Mat3x3 operator-(const Mat3x3& other) const {
-        Mat3x3 result = Zero();
+    constexpr Mat3 operator-(const Mat3& other) const {
+        Mat3 result = Zero();
         for (std::size_t index = 0; index < m_.size(); ++index) {
             result.m_[index] = m_[index] - other.m_[index];
         }
         return result;
     }
 
-    constexpr Mat3x3 operator*(const float& other) const {
-        Mat3x3 result = Zero();
+    constexpr Mat3 operator*(const float& other) const {
+        Mat3 result = Zero();
         for (std::size_t i = 0; i < m_.size(); i++) {
             result.m_[i] = m_[i] * other;
         }
@@ -59,8 +59,8 @@ class Mat3x3 {
         return result;
     }
 
-    constexpr Mat3x3 operator*(const Mat3x3& other) const {
-        Mat3x3 result = Zero();
+    constexpr Mat3 operator*(const Mat3& other) const {
+        Mat3 result = Zero();
         for (std::size_t row = 0; row < 3; row++) {
             for (std::size_t col = 0; col < 3; col++) {
                 for (std::size_t i = 0; i < 3; i++) {
@@ -80,7 +80,7 @@ class Mat3x3 {
     }
 
     constexpr void T() {
-        Mat3x3 result = Mat3x3::Zero();
+        Mat3 result = Mat3::Zero();
         for (std::size_t row = 0; row < 3; row++) {
             for (std::size_t col = 0; col < 3; col++) {
                 result(col, row) = (*this)(row, col);
@@ -106,6 +106,34 @@ class Mat3x3 {
         const float minor02 = m10 * m21 - m11 * m20;
 
         return m00 * minor00 - m01 * minor01 + m02 * minor02;
+    }
+
+    constexpr Mat3 inverse() const {
+        const float m00 = (*this)(0, 0);
+        const float m01 = (*this)(0, 1);
+        const float m02 = (*this)(0, 2);
+        const float m10 = (*this)(1, 0);
+        const float m11 = (*this)(1, 1);
+        const float m12 = (*this)(1, 2);
+        const float m20 = (*this)(2, 0);
+        const float m21 = (*this)(2, 1);
+        const float m22 = (*this)(2, 2);
+
+        const float determinantValue = determinant();
+        assert(determinantValue != 0.0F);
+        const float inverseDeterminant = 1.0F / determinantValue;
+
+        return Mat3{{
+            (m11 * m22 - m12 * m21) * inverseDeterminant,
+            (m02 * m21 - m01 * m22) * inverseDeterminant,
+            (m01 * m12 - m02 * m11) * inverseDeterminant,
+            (m12 * m20 - m10 * m22) * inverseDeterminant,
+            (m00 * m22 - m02 * m20) * inverseDeterminant,
+            (m02 * m10 - m00 * m12) * inverseDeterminant,
+            (m10 * m21 - m11 * m20) * inverseDeterminant,
+            (m01 * m20 - m00 * m21) * inverseDeterminant,
+            (m00 * m11 - m01 * m10) * inverseDeterminant,
+        }};
     }
 
   private:
