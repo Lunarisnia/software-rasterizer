@@ -4,6 +4,8 @@
 #include <array>
 #include <cassert>
 #include <cstddef>
+#include <limits>
+#include <optional>
 namespace swr::math {
 class Mat3 {
   public:
@@ -108,7 +110,7 @@ class Mat3 {
         return m00 * minor00 - m01 * minor01 + m02 * minor02;
     }
 
-    constexpr Mat3 inverse() const {
+    constexpr std::optional<Mat3> inverse() const {
         const float m00 = (*this)(0, 0);
         const float m01 = (*this)(0, 1);
         const float m02 = (*this)(0, 2);
@@ -120,7 +122,10 @@ class Mat3 {
         const float m22 = (*this)(2, 2);
 
         const float determinantValue = determinant();
-        assert(determinantValue != 0.0F);
+        if (determinantValue >= -std::numeric_limits<float>::epsilon() &&
+            determinantValue <= std::numeric_limits<float>::epsilon()) {
+            return std::nullopt;
+        }
         const float inverseDeterminant = 1.0F / determinantValue;
 
         return Mat3{{
